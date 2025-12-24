@@ -1,0 +1,86 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+
+entity Client {
+  * id_client : INT <<PK>>
+  --
+  nom : VARCHAR
+}
+
+entity Admin {
+  * id_admin : INT <<PK>>
+  --
+  nom : VARCHAR
+}
+
+entity Form {
+  * id_form : INT <<PK>>
+  --
+  * id_client : INT <<FK>>
+  * id_admin : INT <<FK>>
+  * id_maisonFuneraille : INT <<FK>>
+}
+
+entity MaisonFuneraille {
+  * id_maisonFuneraille : INT <<PK>>
+  --
+  nom : VARCHAR
+}
+
+entity Cosmetique {
+  * id_cosmetique : INT <<PK>>
+  --
+  nom : VARCHAR
+}
+
+entity refresh_tokens {
+  * id : INT <<PK>>
+  --
+  status : VARCHAR
+}
+
+' Tables associatives (relations n..n)
+entity Form_Client {
+  * id_client : INT <<PK, FK>>
+  --
+  nom : VARCHAR
+}
+
+entity Form_Admin {
+  * id_admin : INT <<PK, FK>>
+  --
+  nom : VARCHAR
+}
+
+entity Form_Maison {
+  * id_maisonFuneraille : INT <<PK, FK>>
+  --
+  nom : VARCHAR
+}
+
+entity Form_Cosmetique {
+  * id_cosmetique : INT <<PK, FK>>
+  --
+  nom : VARCHAR
+}
+
+' Relations
+Client ||--o{ Form
+
+Admin ||--o{ Form
+
+Form }o--o{ Cosmetique
+
+Form }o--|| MaisonFuneraille
+
+Client ||--o{ Form_Client
+
+Admin ||--o{ Form_Admin
+
+MaisonFuneraille ||--o{ Form_Maison
+
+Cosmetique ||--o{ Form_Cosmetique
+
+Admin ||--o{ refresh_tokens
+@enduml

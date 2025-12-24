@@ -1,0 +1,52 @@
+@startuml
+
+' --- Presentation ---
+package "Couche Présentation" #EFF6FF {
+  [Formulaire Client] as ClientForm
+  [Tableau de Bord Admin] as AdminDashboard
+}
+
+' --- API ---
+package "Couche API REST" #FEF9C3 {
+  [API REST] as API
+}
+
+' --- Business Logic ---
+package "Couche Logique Métier" #F3E8FF {
+  [Gestion des Formulaires] as BusinessLogic
+  [Gestion Authentification] as AuthLogic
+}
+
+' --- Database ---
+package "Couche Base de Données" #DCFCE7 {
+  [Base de Données Relationnelle] as Database
+}
+
+' --- Relations ---
+ClientForm --> API : "Soumettre\nPOST /forms"
+AdminDashboard --> API : "Consulter / Modifier\nGET / PATCH /forms/:id"
+
+API --> BusinessLogic : "Traiter Formulaires"
+API --> AuthLogic : "Authentifier Utilisateurs"
+
+BusinessLogic --> Database : "Persister Formulaires"
+AuthLogic --> Database : "Persister Tokens / Admins"
+
+' --- Entities & Notes ---
+note right of Database
+Tables principales:
+- Client
+- Admin
+- Form
+- MaisonFuneraille
+- Cosmetique + FormCosmetique
+- refresh_tokens / Token_Admin
+end note
+
+note left of BusinessLogic
+- Validation des données
+- Gestion des statuts (OPEN, PEND, CLOSE)
+- Gestion Authentification (JWT / refresh tokens)
+end note
+
+@enduml

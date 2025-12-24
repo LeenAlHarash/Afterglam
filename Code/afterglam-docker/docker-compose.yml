@@ -1,0 +1,59 @@
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./tests:/app/tests
+      - ./tests_services:/app/tests_services
+      - ./afterglam-db.sql:/docker-entrypoint-initdb.d/afterglam-db.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  app:
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      API_DB_HOST: db
+      PORT: $PORT
+      SECRET_KEY: ${SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      PROJECT_NAME: ${PROJECT_NAME}
+      API_VERSION: ${API_VERSION}
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    ports:
+      - ${PORT:-8080}:8080
+
+  auth:
+    build: 
+      context: .
+      dockerfile: Dockerfile.auth
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      API_DB_HOST: db
+
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      REFRESH_TOKEN_EXPIRE_MINUTES: ${REFRESH_TOKEN_EXPIRE_MINUTES:-1440}
+      JWT_ISSUER: ${JWT_ISSUER:-auth-service}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-myapp-users}
+
+volumes:
+  db_data: 
+  # Docker n'as pas de persistance par défaut. Donc si on a un conteneur avec la bd et qu'on ferme le conteneur, la bd n'existe plus et on perd nos données
+  # Donc on crée un volume qui rend la bd persistant. Donc quand on ferme le conteneur, on garde nos données

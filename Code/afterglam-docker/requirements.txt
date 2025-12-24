@@ -1,0 +1,13 @@
+starlette
+fastapi[standard]
+uvicorn[standard]
+mysql-connector-python
+pydantic
+pydantic-settings
+python-dotenv
+requests
+pytest
+pytest-bdd
+bcrypt
+python-jose
+python-jose[cryptography]

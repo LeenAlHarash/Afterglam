@@ -1,0 +1,10 @@
+@startuml
+' Diagramme de séquence système
+' Scénario : Client envoie une demande de don
+Client -> API : POST /form {données}
+API -> Form : Crée un nouveau form
+Form --> API : Succès
+API -> Admin : Notifier la nouvelle demande (form)
+Admin -> API : Mettre à jour le statut de la demande
+API -> Client : Envoyer la confirmation
+@enduml

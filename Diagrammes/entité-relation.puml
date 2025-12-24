@@ -1,0 +1,82 @@
+@startuml
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+!define table(x) entity x << (T, white) >>
+skinparam linetype ortho
+skinparam rankdir TB
+
+' TABLES DE LA BASE DE DONNÉES AFTERGLAM
+
+table(Client) {
+  primary_key(id): UUID <<PK>>
+  --
+  column(nom): VARCHAR(255) NOT NULL
+  column(prenom): VARCHAR(255) NOT NULL
+  column(telephone): VARCHAR(20) NOT NULL
+  column(courriel): VARCHAR(80) NOT NULL
+  column(adresse): VARCHAR(100) NOT NULL
+  column(code_postal): VARCHAR(10) NOT NULL
+}
+
+table(Admin) {
+  primary_key(id): UUID <<PK>>
+  --
+  column(nom): VARCHAR(255) NOT NULL
+  column(prenom): VARCHAR(255) NOT NULL
+  column(telephone): VARCHAR(20) NOT NULL
+  column(courriel): VARCHAR(80) NOT NULL
+  column(mdp): VARCHAR(72) ENCRYPT NOT NULL
+  
+}
+
+table(Form) {
+  primary_key(id): UUID <<PK>>
+  --
+  column(date_creation): DATETIME NOT NULL
+  column(statut): ENUM ('OPEN', 'CLOSE', 'PEND') NOT NULL
+  column(date_collecte): DATETIME NOT NULL
+  --
+  foreign_key(client_id): UUID <<FK>>
+  foreign_key(admin_id): UUID <<FK>>
+  foreign_key(maison_id): UUID <<FK>>
+}
+
+table(MaisonFuneraille) {
+  primary_key(id): UUID <<PK>>
+  --
+  column(nom): VARCHAR(255) NOT NULL
+  column(telephone): VARCHAR(20) NOT NULL
+  column(adresse): VARCHAR(100) NOT NULL
+  column(code_postal): VARCHAR(10) NOT NULL
+}
+
+table(Cosmetique) {
+  primary_key(id): UUID <<PK>>
+  --
+  column(nom): VARCHAR(255) NOT NULL
+  
+}
+
+table(FormCosmetique) {
+  primary_key(id): UUID <<PK>>
+  --
+  foreign_key(form_id): UUID <<FK>>
+  foreign_key(cosmetique_id): UUID <<FK>>
+}
+
+table(refresh_tokens) {
+  primary_key(id): UUID <<PK>>
+}
+
+' Relations
+Client ||--o{ Form : soumet >
+Admin ||--o{ Form : gère >
+Form }o--o{ Cosmetique : contient >
+Cosmetique }o--o{ Form : listé >
+Form }o--|| MaisonFuneraille : concerne >
+Form ||--o{ FormCosmetique : associé >
+Cosmetique ||--o{ FormCosmetique : listé >
+Admin ||--o{ refresh_tokens : possède >
+
+@enduml

@@ -1,0 +1,90 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Client {
+  - id: UUID
+  - nom: VARCHAR
+  - prenom: VARCHAR
+  - telephone: VARCHAR
+  - courriel: VARCHAR
+  - adresse: VARCHAR
+  - code_postal: VARCHAR
+  --
+  + soumettreDemande()
+}
+
+class Admin {
+  - id: UUID
+  - nom: VARCHAR
+  - prenom: VARCHAR
+  - telephone: VARCHAR
+  - courriel: VARCHAR
+  - mdp: VARCHAR
+  --
+  + gererDemande()
+  + modifierStatut()
+}
+
+class Form {
+  - id: UUID
+  - date_creation: DATETIME
+  - statut: Enum
+  - date_collecte: DATETIME
+  - client_id: UUID
+  - admin_id: UUID
+  - maison_id: UUID
+  --
+  + creerForm()
+  + mettreAJourStatut()
+}
+
+class MaisonFuneraille {
+  - id: UUID
+  - nom: VARCHAR
+  - telephone: VARCHAR
+  - adresse: VARCHAR
+  - code_postal: VARCHAR
+  --
+  + getDetails()
+}
+
+class Cosmetique {
+  - id: UUID
+  - nom: VARCHAR
+  --
+  + liste()
+}
+
+class FormCosmetique {
+  - form_id: UUID
+  - cosmetique_id: UUID
+  --
+  + associer()
+  + dissocier()
+}
+
+class RefreshToken {
+  - id: UUID
+  - status: VARCHAR
+  --
+  + generer()
+  + valider()
+}
+
+class AuthService {
+  --
+  + login()
+  + logout()
+  + refreshToken()
+}
+
+' --- Relations ---
+Client "1" --> "0..*" Form : soumet >
+Admin "1" --> "0..*" Form : gère >
+Form "*" --> "1" MaisonFuneraille : concerne >
+Form "1" --> "0..*" FormCosmetique
+Cosmetique "1" --> "0..*" FormCosmetique
+
+Admin "1" --> "0..*" RefreshToken
+AuthService --> RefreshToken
+@enduml

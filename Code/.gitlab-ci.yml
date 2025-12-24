@@ -1,0 +1,51 @@
+image: tiangolo/uvicorn-gunicorn:python3.11
+
+stages:
+  - build
+  - test
+  - deploy
+
+.prepare_contexte: &prepare_contexte
+    - apt update && apt install -y ca-certificates openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$ID_RSA_PRIV" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 400 ~/.ssh/id_ed25519
+    - echo -e "Host *\n  StrictHostKeyChecking no" > ~/.ssh/config
+
+cache:
+  paths:
+    - ~/.cache/pip/
+
+before_script:
+  - pip install --upgrade pip
+  - pip install -r afterglam-docker/requirements.txt
+  - pip install pytest
+
+build-job:
+  stage: build
+  script:
+    - echo "Building the project.."
+    - echo "Hello, $GITLAB_USER_LOGIN!"
+
+testing:
+  stage: test
+  script:
+    - echo "Fin des tests"
+
+deploy:
+  stage: deploy
+  needs:
+    - job: testing
+  before_script:
+    - *prepare_contexte
+  script:
+    - echo "Deploying from branch $CI_COMMIT_BRANCH"
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir -p /home/$DEPLOY_USER/app"
+    - scp -r ./afterglam-docker $DEPLOY_USER@$DEPLOY_HOST:/home/$DEPLOY_USER/app/
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "cd /home/$DEPLOY_USER/app && docker compose -f afterglam-docker/docker-compose.yml down"
+    - ssh $DEPLOY_USER@$DEPLOY_HOST "cd /home/$DEPLOY_USER/app && docker compose -f afterglam-docker/docker-compose.yml up -d --build"
+  environment:
+    name: production
+    url: "https://localhost:8080"
+  only:
+    - dev

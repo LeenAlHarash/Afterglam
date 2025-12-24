@@ -1,0 +1,11 @@
+FROM python:3.11
+
+WORKDIR /AuthService
+
+COPY ./requirements.txt /AuthService/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /AuthService/requirements.txt
+
+COPY . /AuthService/
+
+CMD ["uvicorn", "auth.main:app", "--host", "0.0.0.0", "--port", "8080"]

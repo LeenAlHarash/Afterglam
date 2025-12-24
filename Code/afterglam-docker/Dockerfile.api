@@ -1,0 +1,11 @@
+FROM python:3.13
+
+WORKDIR /Afterglam
+
+COPY ./requirements.txt /Afterglam/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /Afterglam/requirements.txt
+
+COPY . /Afterglam/
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
